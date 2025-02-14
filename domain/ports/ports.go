@@ -5,6 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+var ErrNotFound = errors.New("store resource not found")
+var ErrAlreadyExists = errors.New("store resource already exists")
+
 type Storer interface {
 	Create(context.Context, string, Port) error
 	Update(context.Context, string, UpdatePort) error
@@ -19,13 +22,14 @@ func NewDomain(store Storer) *Domain {
 	return &Domain{store: store}
 }
 
-func (d *Domain) Create(ctx context.Context, id string, p Port) error {
+func (d *Domain) Create(ctx context.Context, np NewPort) error {
 	// Do some domain logic here like adding creation date or some other business logic checks
-	err := d.store.Create(ctx, id, p)
+	err := d.store.Create(ctx, np.ID, np.Port)
 	if err != nil {
 		return errors.Wrap(err, "creating port in")
 	}
-	return d.store.Create(ctx, id, p)
+
+	return nil
 }
 
 func (d *Domain) Update(ctx context.Context, id string, up UpdatePort) error {
@@ -34,5 +38,6 @@ func (d *Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	if err != nil {
 		return errors.Wrap(err, "updating port in")
 	}
-	return d.store.Update(ctx, id, up)
+
+	return nil
 }

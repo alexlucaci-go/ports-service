@@ -3,12 +3,8 @@ package inmemorydb
 import (
 	"context"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
-	"github.com/pkg/errors"
 	"sync"
 )
-
-var ErrNotFound = errors.New("store resource not found")
-var ErrAlreadyExists = errors.New("store resource already exists")
 
 type InMemoryDB struct {
 	data map[string]ports.Port
@@ -26,7 +22,7 @@ func (db *InMemoryDB) Create(ctx context.Context, id string, p ports.Port) error
 	defer db.mu.Unlock()
 
 	if _, ok := db.data[id]; ok {
-		return ErrAlreadyExists
+		return ports.ErrAlreadyExists
 	}
 
 	db.data[id] = p
@@ -39,7 +35,7 @@ func (db *InMemoryDB) Update(ctx context.Context, id string, up ports.UpdatePort
 
 	port, ok := db.data[id]
 	if !ok {
-		return ErrNotFound
+		return ports.ErrNotFound
 	}
 
 	if up.Name != nil {
@@ -83,7 +79,7 @@ func (db *InMemoryDB) Get(ctx context.Context, id string) (ports.Port, error) {
 
 	p, ok := db.data[id]
 	if !ok {
-		return ports.Port{}, ErrNotFound
+		return ports.Port{}, ports.ErrNotFound
 	}
 
 	return p, nil
