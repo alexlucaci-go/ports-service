@@ -9,17 +9,6 @@ import (
 // middleware is a wrapper function that can will execute some code before or after another Handler
 type middleware func(Handler) Handler
 
-func wrapMiddleware(mw []middleware, handler Handler) Handler {
-	for i := len(mw) - 1; i >= 0; i-- {
-		h := mw[i]
-		if h != nil {
-			handler = h(handler)
-		}
-	}
-
-	return handler
-}
-
 // errorsMid is a middleware that catches any errors that is being returned from the handler
 func errorsMid() middleware {
 	// This is the actual middleware function to be executed.
@@ -46,18 +35,21 @@ func errorsMid() middleware {
 }
 
 // panicsMid is a middleware that catches any panics, recovers from them and returns an error to the client
+// nolint
 func panicsMid() middleware {
 	// not implemented
 	return nil
 }
 
 // loggerMid is a middleware that logs information about the request
+// nolint
 func loggerMid() middleware {
 	// not implemented
 	return nil
 }
 
 // authMid is a middleware that checks if the user is authenticated
+// nolint
 func authMid() middleware {
 	// not implemented
 	return nil
