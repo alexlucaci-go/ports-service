@@ -13,6 +13,11 @@ type Port struct {
 	Code        string    `json:"code"`
 }
 
+type NewPort struct {
+	ID string `json:"id"`
+	Port
+}
+
 type UpdatePort struct {
 	Name        *string    `json:"name"`
 	City        *string    `json:"city"`

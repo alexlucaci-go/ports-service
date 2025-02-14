@@ -1,6 +1,7 @@
 package inmemorydb
 
 import (
+	"context"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/pkg/errors"
 	"sync"
@@ -20,7 +21,7 @@ func NewInMemoryDB() *InMemoryDB {
 	}
 }
 
-func (db *InMemoryDB) Create(id string, p ports.Port) error {
+func (db *InMemoryDB) Create(ctx context.Context, id string, p ports.Port) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -32,7 +33,7 @@ func (db *InMemoryDB) Create(id string, p ports.Port) error {
 	return nil
 }
 
-func (db *InMemoryDB) Update(id string, up ports.UpdatePort) error {
+func (db *InMemoryDB) Update(ctx context.Context, id string, up ports.UpdatePort) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -76,7 +77,7 @@ func (db *InMemoryDB) Update(id string, up ports.UpdatePort) error {
 	return nil
 }
 
-func (db *InMemoryDB) Get(id string) (ports.Port, error) {
+func (db *InMemoryDB) Get(ctx context.Context, id string) (ports.Port, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 

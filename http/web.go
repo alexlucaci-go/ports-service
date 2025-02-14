@@ -42,7 +42,7 @@ func (s *Service) Handle(method string, path string, handler Handler) {
 	s.mux.HandleFunc(pathWithMethod, h)
 }
 
-func (s *Service) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 

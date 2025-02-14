@@ -7,8 +7,8 @@ import (
 
 type Storer interface {
 	Create(context.Context, string, Port) error
-	Update(context.Context, string, Port) error
-	Get(ctx context.Context, id string) (Port, error)
+	Update(context.Context, string, UpdatePort) error
+	Get(context.Context, string) (Port, error)
 }
 
 type Domain struct {
@@ -28,11 +28,11 @@ func (d *Domain) Create(ctx context.Context, id string, p Port) error {
 	return d.store.Create(ctx, id, p)
 }
 
-func (d *Domain) Update(ctx context.Context, id string, p Port) error {
+func (d *Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	// Do some domain logic here like adding update date or some other business logic checks
-	err := d.store.Update(ctx, id, p)
+	err := d.store.Update(ctx, id, up)
 	if err != nil {
 		return errors.Wrap(err, "updating port in")
 	}
-	return d.store.Update(ctx, id, p)
+	return d.store.Update(ctx, id, up)
 }
