@@ -15,3 +15,7 @@ func Decode(r *http.Request, val interface{}) error {
 
 	return nil
 }
+
+func Param(r *http.Request, name string) string {
+	return r.PathValue(name)
+}

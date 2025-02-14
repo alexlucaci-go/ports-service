@@ -26,7 +26,7 @@ func (d *Domain) Create(ctx context.Context, np NewPort) error {
 	// Do some domain logic here like adding creation date or some other business logic checks
 	err := d.store.Create(ctx, np.ID, np.Port)
 	if err != nil {
-		return errors.Wrap(err, "creating port in")
+		return errors.Wrap(err, "calling store create")
 	}
 
 	return nil
@@ -36,8 +36,17 @@ func (d *Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	// Do some domain logic here like adding update date or some other business logic checks
 	err := d.store.Update(ctx, id, up)
 	if err != nil {
-		return errors.Wrap(err, "updating port in")
+		return errors.Wrap(err, "calling store update")
 	}
 
 	return nil
+}
+
+func (d *Domain) Get(ctx context.Context, id string) (Port, error) {
+	port, err := d.store.Get(ctx, id)
+	if err != nil {
+		return Port{}, errors.Wrap(err, "calling store get")
+	}
+
+	return port, nil
 }

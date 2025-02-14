@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -61,7 +62,8 @@ func TestCreatePort_AlreadyExisting(t *testing.T) {
 		},
 	}
 
-	body, _ := json.Marshal(portData)
+	body, err := json.Marshal(portData)
+	require.NoError(t, err, "marshalling request body")
 	req := httptest.NewRequest(http.MethodPost, "/v1/ports", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -103,7 +105,9 @@ func TestUpdatePort(t *testing.T) {
 		},
 	}
 
-	body, _ := json.Marshal(portData)
+	body, err := json.Marshal(portData)
+	require.NoError(t, err, "marshalling request body")
+
 	req := httptest.NewRequest(http.MethodPost, "/v1/ports", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -117,8 +121,10 @@ func TestUpdatePort(t *testing.T) {
 
 	var up ports.UpdatePort
 	up.Name = ports.StringToPointerString("New Ajman")
-	body, _ = json.Marshal(portData)
-	req = httptest.NewRequest(http.MethodPut, "/v1/ports/AEAJM", bytes.NewReader(body))
+	body, err = json.Marshal(up)
+	require.NoError(t, err, "marshalling request body")
+
+	req = httptest.NewRequest(http.MethodPatch, "/v1/ports/AEAJM", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	rec = httptest.NewRecorder()
@@ -127,5 +133,35 @@ func TestUpdatePort(t *testing.T) {
 	res = rec.Result()
 	defer res.Body.Close()
 
+	expectedPortData := portData.Port
+	expectedPortData.Name = "New Ajman"
+
+	var got ports.Port
+	err = json.NewDecoder(res.Body).Decode(&got)
+	require.NoError(t, err, "decoding response body")
+
+	diff := cmp.Diff(expectedPortData, got)
+	require.Empty(t, diff)
+
 	require.Equal(t, http.StatusOK, res.StatusCode)
+}
+
+func TestUpdatePort_NotExisting(t *testing.T) {
+	api := handlers.API(make(chan os.Signal))
+
+	var up ports.UpdatePort
+	up.Name = ports.StringToPointerString("New Ajman")
+	body, err := json.Marshal(up)
+	require.NoError(t, err, "marshalling request body")
+
+	req := httptest.NewRequest(http.MethodPatch, "/v1/ports/AEAJM", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	rec := httptest.NewRecorder()
+	api.ServeHTTP(rec, req)
+
+	res := rec.Result()
+	defer res.Body.Close()
+
+	require.Equal(t, http.StatusNotFound, res.StatusCode)
 }

@@ -22,15 +22,40 @@ func (ph *portsHandler) Create(ctx context.Context, w http.ResponseWriter, r *ht
 	if err != nil {
 		switch {
 		case errors.As(err, &ports.ErrAlreadyExists):
-			return web.Respond(ctx, w, nil, http.StatusConflict)
+			return web.NewRequestError(errors.New("a resource with provided id already exists"), http.StatusConflict)
 		default:
 			return web.RespondError(ctx, w, errors.Wrap(err, "creating port"))
 		}
 	}
 
-	return web.Respond(ctx, w, nil, http.StatusCreated)
+	return web.Respond(ctx, w, np.Port, http.StatusCreated)
 }
 
 func (ph *portsHandler) Update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	return nil
+	id := web.Param(r, "id")
+	if id == "" {
+		return web.NewRequestError(errors.New("id path param is required"), http.StatusBadRequest)
+	}
+
+	var up ports.UpdatePort
+	if err := web.Decode(r, &up); err != nil {
+		return err
+	}
+
+	err := ph.domain.Update(ctx, id, up)
+	if err != nil {
+		switch {
+		case errors.As(err, &ports.ErrNotFound):
+			return web.NewRequestError(errors.New("resource with provided id is not found"), http.StatusNotFound)
+		default:
+			return web.RespondError(ctx, w, errors.Wrap(err, "updating port"))
+		}
+	}
+
+	updatedPort, err := ph.domain.Get(ctx, id)
+	if err != nil {
+		return web.RespondError(ctx, w, errors.Wrap(err, "getting updated port"))
+	}
+
+	return web.Respond(ctx, w, updatedPort, http.StatusOK)
 }

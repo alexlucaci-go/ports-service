@@ -12,7 +12,7 @@ func API(shutdown chan os.Signal) http.Handler {
 	service := web.NewService(shutdown)
 	ph := portsHandler{ports.NewDomain(inmemorydb.NewInMemoryDB())}
 	service.Handle(http.MethodPost, "/v1/ports", ph.Create)
-	service.Handle(http.MethodPatch, "/v1/ports/:id", ph.Update)
+	service.Handle(http.MethodPatch, "/v1/ports/{id}", ph.Update)
 
 	return service
 }
