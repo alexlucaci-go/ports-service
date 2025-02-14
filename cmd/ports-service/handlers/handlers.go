@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
-	web "github.com/alexlucaci-go/ports-service/http"
+	"github.com/alexlucaci-go/ports-service/web"
 	"net/http"
 	"os"
 )

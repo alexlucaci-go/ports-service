@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
-	web "github.com/alexlucaci-go/ports-service/http"
+	"github.com/alexlucaci-go/ports-service/web"
 	"github.com/pkg/errors"
 	"net/http"
 )
