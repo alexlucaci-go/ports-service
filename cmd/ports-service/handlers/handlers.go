@@ -8,9 +8,9 @@ import (
 	"os"
 )
 
-func API(shutdown chan os.Signal) http.Handler {
+func API(shutdown chan os.Signal, db *inmemorydb.InMemoryDB) http.Handler {
 	service := web.NewService(shutdown)
-	ph := portsHandler{ports.NewDomain(inmemorydb.NewInMemoryDB())}
+	ph := portsHandler{ports.NewDomain(db)}
 	service.Handle(http.MethodPost, "/v1/ports", ph.Create)
 	service.Handle(http.MethodPatch, "/v1/ports/{id}", ph.Update)
 

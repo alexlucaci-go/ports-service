@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestCreatePort(t *testing.T) {
-	api := handlers.API(make(chan os.Signal))
+	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
 		ID: "AEAJM",
 		Port: ports.Port{
@@ -45,7 +46,7 @@ func TestCreatePort(t *testing.T) {
 }
 
 func TestCreatePort_AlreadyExisting(t *testing.T) {
-	api := handlers.API(make(chan os.Signal))
+	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
 		ID: "AEAJM",
 		Port: ports.Port{
@@ -88,7 +89,7 @@ func TestCreatePort_AlreadyExisting(t *testing.T) {
 }
 
 func TestUpdatePort(t *testing.T) {
-	api := handlers.API(make(chan os.Signal))
+	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
 		ID: "AEAJM",
 		Port: ports.Port{
@@ -147,7 +148,7 @@ func TestUpdatePort(t *testing.T) {
 }
 
 func TestUpdatePort_NotExisting(t *testing.T) {
-	api := handlers.API(make(chan os.Signal))
+	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 
 	var up ports.UpdatePort
 	up.Name = ports.StringToPointerString("New Ajman")

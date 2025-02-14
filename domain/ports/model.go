@@ -1,5 +1,8 @@
 package ports
 
+// Port represents the struct format of a port from the json file
+// my assumption was that those fields are present in any port item in the json file
+// but I didn't check all of them to actually get the unified format
 type Port struct {
 	Name        string    `json:"name"`
 	City        string    `json:"city"`
