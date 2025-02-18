@@ -7,6 +7,8 @@ import (
 
 var ErrNotFound = errors.New("store resource not found")
 var ErrAlreadyExists = errors.New("store resource already exists")
+var ErrNoCoordinates = errors.New("both coordinates are required")
+var ErrIncorrectLatitudeOrLongitudeValues = errors.New("incorrect latitude or longitude. latitude should range from -90 to 90 and longitude from -180 to 180")
 
 type Storer interface {
 	Create(context.Context, string, Port) error
@@ -26,6 +28,14 @@ func NewDomain(store Storer) *Domain {
 
 func (d *Domain) Create(ctx context.Context, np NewPort) error {
 	// Do some domain logic here like adding creation date or some other business logic checks
+	if len(np.Port.Coordinates) != 2 {
+		return ErrNoCoordinates
+	}
+
+	if np.Port.Coordinates[0] < -180 || np.Port.Coordinates[0] > 180 || np.Port.Coordinates[1] < -90 || np.Port.Coordinates[1] > 90 {
+		return ErrIncorrectLatitudeOrLongitudeValues
+	}
+
 	err := d.store.Create(ctx, np.ID, np.Port)
 	if err != nil {
 		return errors.Wrap(err, "calling store create")
