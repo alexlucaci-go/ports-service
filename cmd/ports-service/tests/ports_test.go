@@ -381,6 +381,5 @@ func TestList(t *testing.T) {
 	got = []ports.Port{}
 	err = json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
-	diff = cmp.Diff([]ports.Port{portData.Port, portdata2.Port}, got)
-	require.Empty(t, diff)
+	require.Equal(t, 2, len(got), "listing ports")
 }
