@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
 	"github.com/alexlucaci-go/ports-service/loader"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"os"
@@ -64,7 +64,7 @@ func run() error {
 
 	err := jsonLoader.LoadFromFile(ctx, "ports.json")
 	if err != nil {
-		return errors.Wrap(err, "loading ports from json")
+		return fmt.Errorf("loading ports from file: %w", err)
 	}
 
 	shutdown := make(chan os.Signal, 1)
@@ -87,7 +87,7 @@ func run() error {
 	// Blocking main and waiting for shutdown.
 	select {
 	case err := <-serverErrors:
-		return errors.Wrap(err, "server error")
+		return fmt.Errorf("server error: %w", err)
 
 	case sig := <-shutdown:
 		log.Printf("main: %v : Start shutdown", sig)
@@ -99,7 +99,7 @@ func run() error {
 		// Asking listener to shutdown and shed load.
 		if err := api.Shutdown(ctx); err != nil {
 			api.Close()
-			return errors.Wrap(err, "could not stop server gracefully")
+			return fmt.Errorf("stopping gracefully: %w", err)
 		}
 	}
 

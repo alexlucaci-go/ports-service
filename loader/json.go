@@ -3,8 +3,9 @@ package loader
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
-	"github.com/pkg/errors"
 	"os"
 )
 
@@ -19,7 +20,7 @@ func NewJson(domain *ports.Domain) *Json {
 func (l *Json) LoadFromFile(ctx context.Context, filePath string) error {
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
 	if err != nil {
-		return errors.Wrap(err, "opening file")
+		return fmt.Errorf("opening file: %w", err)
 	}
 	defer file.Close()
 
@@ -28,7 +29,7 @@ func (l *Json) LoadFromFile(ctx context.Context, filePath string) error {
 	// Read the opening '{'
 	token, err := decoder.Token()
 	if err != nil {
-		return errors.Wrap(err, "reading opening token")
+		return fmt.Errorf("reading opening token: %w", err)
 	}
 
 	if token != json.Delim('{') {
@@ -42,19 +43,19 @@ func (l *Json) LoadFromFile(ctx context.Context, filePath string) error {
 		var port ports.Port
 		idToken, err := decoder.Token()
 		if err != nil {
-			return errors.Wrap(err, "reading id token")
+			return fmt.Errorf("reading id token: %w", err)
 		}
 
 		id = idToken.(string)
 
 		err = decoder.Decode(&port)
 		if err != nil {
-			return errors.Wrap(err, "decoding port")
+			return fmt.Errorf("decoding port: %w", err)
 		}
 
 		err = l.domain.Create(ctx, ports.NewPort{ID: id, Port: port})
 		if err != nil {
-			return errors.Wrap(err, "creating port")
+			return fmt.Errorf("creating port: %w", err)
 		}
 	}
 
