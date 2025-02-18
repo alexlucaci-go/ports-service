@@ -33,24 +33,3 @@ func errorsMid() middleware {
 
 	return m
 }
-
-// panicsMid is a middleware that catches any panics, recovers from them and returns an error to the client
-// nolint
-func panicsMid() middleware {
-	// not implemented
-	return nil
-}
-
-// loggerMid is a middleware that logs information about the request
-// nolint
-func loggerMid() middleware {
-	// not implemented
-	return nil
-}
-
-// authMid is a middleware that checks if the user is authenticated
-// nolint
-func authMid() middleware {
-	// not implemented
-	return nil
-}
