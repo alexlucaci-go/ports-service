@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
-	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
+	"github.com/alexlucaci-go/ports-service/infrastructure/store/inmemorydb"
 
 	"github.com/stretchr/testify/require"
 )
