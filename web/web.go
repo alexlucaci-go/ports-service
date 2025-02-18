@@ -16,14 +16,14 @@ type Service struct {
 	mux      *http.ServeMux
 }
 
-func NewService(shutdown chan os.Signal) *Service {
-	return &Service{
+func NewService(shutdown chan os.Signal) Service {
+	return Service{
 		shutdown: shutdown,
 		mux:      http.NewServeMux(),
 	}
 }
 
-func (s *Service) Handle(method string, path string, handler Handler) {
+func (s Service) Handle(method string, path string, handler Handler) {
 
 	handler = errorsMid()(handler)
 	// add other middlewares here
@@ -42,10 +42,10 @@ func (s *Service) Handle(method string, path string, handler Handler) {
 	s.mux.HandleFunc(pathWithMethod, h)
 }
 
-func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func (s *Service) SignalShutdown() {
+func (s Service) SignalShutdown() {
 	s.shutdown <- syscall.SIGTERM
 }
