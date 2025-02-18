@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
 	"github.com/alexlucaci-go/ports-service/web"
-	"net/http"
-	"os"
 )
 
 func API(shutdown chan os.Signal, db *inmemorydb.InMemoryDB) http.Handler {

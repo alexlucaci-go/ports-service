@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
-	"github.com/alexlucaci-go/ports-service/domain/ports"
-	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
-	"github.com/alexlucaci-go/ports-service/loader"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
+	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
+	"github.com/alexlucaci-go/ports-service/loader"
 )
 
 func main() {
@@ -56,7 +57,7 @@ func run() error {
 
 	db := inmemorydb.NewInMemoryDB()
 	portdomain := ports.NewDomain(db)
-	jsonLoader := loader.NewJson(portdomain)
+	jsonLoader := loader.NewJSON(portdomain)
 
 	// configure loader to timeout after a certain time
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Loader.Timeout)
@@ -93,7 +94,7 @@ func run() error {
 		log.Printf("main: %v : Start shutdown", sig)
 
 		// Give outstanding requests a deadline for completion.
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
 		defer cancel()
 
 		// Asking listener to shutdown and shed load.

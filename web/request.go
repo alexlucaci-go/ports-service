@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Decode(r *http.Request, val interface{}) error {
+func Decode(r *http.Request, val any) error {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(val); err != nil {
 		// can include here field validation logic to compose the FieldErrors that should be included in the response

@@ -3,15 +3,16 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 )
 
 func TestCreatePort(t *testing.T) {
@@ -66,7 +67,7 @@ func TestCreatePort_AlreadyExisting(t *testing.T) {
 	}
 
 	body, err := json.Marshal(portData)
-	require.NoError(t, err, "marshalling request body")
+	require.NoError(t, err, "marshaling request body")
 	req := httptest.NewRequest(http.MethodPost, "/v1/ports", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -110,7 +111,7 @@ func TestUpdatePort(t *testing.T) {
 	}
 
 	body, err := json.Marshal(portData)
-	require.NoError(t, err, "marshalling request body")
+	require.NoError(t, err, "marshaling request body")
 
 	req := httptest.NewRequest(http.MethodPost, "/v1/ports", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -126,7 +127,7 @@ func TestUpdatePort(t *testing.T) {
 	var up ports.UpdatePort
 	up.Name = ports.StringToPointerString("New Ajman")
 	body, err = json.Marshal(up)
-	require.NoError(t, err, "marshalling request body")
+	require.NoError(t, err, "marshaling request body")
 
 	req = httptest.NewRequest(http.MethodPatch, "/v1/ports/AEAJM", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -157,7 +158,7 @@ func TestUpdatePort_NotExisting(t *testing.T) {
 	var up ports.UpdatePort
 	up.Name = ports.StringToPointerString("New Ajman")
 	body, err := json.Marshal(up)
-	require.NoError(t, err, "marshalling request body")
+	require.NoError(t, err, "marshaling request body")
 
 	req := httptest.NewRequest(http.MethodPatch, "/v1/ports/AEAJM", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -176,7 +177,7 @@ func TestGetPort_existing_and_not_existing(t *testing.T) {
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 
 	// not existing
-	req := httptest.NewRequest(http.MethodGet, "/v1/ports/AEAJM", nil)
+	req := httptest.NewRequest(http.MethodGet, "/v1/ports/AEAJM", http.NoBody)
 	req.Header.Set("Content-Type", "application/json")
 
 	rec := httptest.NewRecorder()
@@ -213,7 +214,7 @@ func TestGetPort_existing_and_not_existing(t *testing.T) {
 
 	require.Equal(t, http.StatusCreated, res.StatusCode, "creating port")
 
-	req = httptest.NewRequest(http.MethodGet, "/v1/ports/AEAJM", nil)
+	req = httptest.NewRequest(http.MethodGet, "/v1/ports/AEAJM", http.NoBody)
 	req.Header.Set("Content-Type", "application/json")
 
 	rec = httptest.NewRecorder()
@@ -236,7 +237,7 @@ func TestDeletePort_existing_not_existing(t *testing.T) {
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 
 	// not existing
-	req := httptest.NewRequest(http.MethodDelete, "/v1/ports/AEAJM", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/v1/ports/AEAJM", http.NoBody)
 	req.Header.Set("Content-Type", "application/json")
 
 	rec := httptest.NewRecorder()
@@ -273,7 +274,7 @@ func TestDeletePort_existing_not_existing(t *testing.T) {
 
 	require.Equal(t, http.StatusCreated, res.StatusCode, "creating port")
 
-	req = httptest.NewRequest(http.MethodDelete, "/v1/ports/AEAJM", nil)
+	req = httptest.NewRequest(http.MethodDelete, "/v1/ports/AEAJM", http.NoBody)
 	req.Header.Set("Content-Type", "application/json")
 
 	rec = httptest.NewRecorder()
@@ -381,5 +382,5 @@ func TestList(t *testing.T) {
 	got = []ports.Port{}
 	err = json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
-	require.Equal(t, 2, len(got), "listing ports")
+	require.Len(t, got, 2, "listing ports")
 }

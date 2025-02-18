@@ -5,20 +5,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"os"
+
+	"github.com/alexlucaci-go/ports-service/domain/ports"
 )
 
-type Json struct {
+type JSON struct {
 	domain *ports.Domain
 }
 
-func NewJson(domain *ports.Domain) *Json {
-	return &Json{domain: domain}
+func NewJSON(domain *ports.Domain) *JSON {
+	return &JSON{domain: domain}
 }
 
-func (l *Json) LoadFromFile(ctx context.Context, filePath string) error {
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644) //nolint:mnd // 0644 is the default permission
 	if err != nil {
 		return fmt.Errorf("opening file: %w", err)
 	}
