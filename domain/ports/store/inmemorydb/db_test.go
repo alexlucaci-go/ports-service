@@ -8,6 +8,7 @@ import (
 )
 
 func TestSavePort(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -34,6 +35,7 @@ func TestSavePort(t *testing.T) {
 }
 
 func TestSavePort_AlreadyExistingID(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -59,6 +61,7 @@ func TestSavePort_AlreadyExistingID(t *testing.T) {
 }
 
 func TestUpdatePort_OneField(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -94,11 +97,9 @@ func TestUpdatePort_OneField(t *testing.T) {
 	require.Equal(t, updatedPort, savedPort, "comparing updated port with saved port")
 }
 
-func TestUpdatePort_MultipleFields(t *testing.T) {
-	//...
-}
-
 func TestUpdatePort_NotExistingID(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -112,6 +113,7 @@ func TestUpdatePort_NotExistingID(t *testing.T) {
 }
 
 func TestUpdatePort_EmptyUpdate(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -144,6 +146,7 @@ func TestUpdatePort_EmptyUpdate(t *testing.T) {
 }
 
 func TestDeletePort(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -175,6 +178,7 @@ func TestDeletePort(t *testing.T) {
 }
 
 func TestListPorts_limit_less_than_length(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -203,6 +207,7 @@ func TestListPorts_limit_less_than_length(t *testing.T) {
 }
 
 func TestListPorts_limit_equal_with_length(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"
@@ -231,6 +236,7 @@ func TestListPorts_limit_equal_with_length(t *testing.T) {
 }
 
 func TestListPorts_limit_greater_than_length(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	id := "AEAJM"

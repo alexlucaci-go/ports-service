@@ -12,6 +12,8 @@ type Storer interface {
 	Create(context.Context, string, Port) error
 	Update(context.Context, string, UpdatePort) error
 	Get(context.Context, string) (Port, error)
+	Delete(ctx context.Context, id string) error
+	List(ctx context.Context, limit int) ([]Port, error)
 }
 
 type Domain struct {
@@ -49,4 +51,22 @@ func (d *Domain) Get(ctx context.Context, id string) (Port, error) {
 	}
 
 	return port, nil
+}
+
+func (d *Domain) Delete(ctx context.Context, id string) error {
+	err := d.store.Delete(ctx, id)
+	if err != nil {
+		return errors.Wrap(err, "calling store delete")
+	}
+
+	return nil
+}
+
+func (d *Domain) List(ctx context.Context, limit int) ([]Port, error) {
+	ports, err := d.store.List(ctx, limit)
+	if err != nil {
+		return nil, errors.Wrap(err, "calling store list")
+	}
+
+	return ports, nil
 }
