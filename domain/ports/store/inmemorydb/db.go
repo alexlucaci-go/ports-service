@@ -84,3 +84,41 @@ func (db *InMemoryDB) Get(ctx context.Context, id string) (ports.Port, error) {
 
 	return p, nil
 }
+
+func (db *InMemoryDB) Delete(ctx context.Context, id string) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	_, ok := db.data[id]
+	if !ok {
+		return ports.ErrNotFound
+	}
+
+	delete(db.data, id)
+
+	return nil
+}
+
+// List will list store ports; given the fact that the underlying implementation
+// is using a map, subsequent calls to List using the same limit will not return the same data
+// because iterating over map keys is not deterministic
+func (db *InMemoryDB) List(ctx context.Context, limit int) ([]ports.Port, error) {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+
+	if len(db.data) < limit {
+		limit = len(db.data)
+	}
+
+	res := make([]ports.Port, 0, limit)
+	count := 0
+	for _, p := range db.data {
+		if count == limit {
+			break
+		}
+		res = append(res, p)
+		count++
+	}
+
+	return res, nil
+}
