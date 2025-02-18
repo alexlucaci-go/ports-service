@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
@@ -42,7 +43,8 @@ func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
 	for decoder.More() {
 		err = l.decodeAndCreatePort(ctx, decoder)
 		if err != nil {
-			return fmt.Errorf("decoding and creating port: %w", err)
+			log.Printf("skipping port creation: %v\n", err)
+			continue
 		}
 	}
 
