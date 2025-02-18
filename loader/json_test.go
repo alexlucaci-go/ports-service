@@ -9,6 +9,7 @@ import (
 )
 
 func TestJsonLoader(t *testing.T) {
+	t.Parallel()
 	portdomain := ports.NewDomain(inmemorydb.NewInMemoryDB())
 	jsonLoader := NewJson(portdomain)
 	err := jsonLoader.LoadFromFile(context.Background(), "ports_test.json")
