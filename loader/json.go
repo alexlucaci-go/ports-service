@@ -40,25 +40,56 @@ func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
 	// the entire token decoding can probably be done more nicely, but I didn't invest
 	// a lot of time in understanding how to do it properly
 	for decoder.More() {
-		var id string
-		var port ports.Port
-		idToken, err := decoder.Token()
+		err = l.decodeAndCreatePort(ctx, decoder)
 		if err != nil {
-			return fmt.Errorf("reading id token: %w", err)
-		}
-
-		id = idToken.(string)
-
-		err = decoder.Decode(&port)
-		if err != nil {
-			return fmt.Errorf("decoding port: %w", err)
-		}
-
-		err = l.domain.Create(ctx, ports.NewPort{ID: id, Port: port})
-		if err != nil {
-			return fmt.Errorf("creating port: %w", err)
+			return fmt.Errorf("decoding and creating port: %w", err)
 		}
 	}
 
 	return nil
+}
+
+func (l *JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) error {
+	id, p, err := l.decodePort(decoder)
+	if err != nil {
+		return fmt.Errorf("decoding port: %w", err)
+	}
+
+	domainPort := ports.Port{
+		ID:          id,
+		Name:        p.Name,
+		City:        p.City,
+		Country:     p.Country,
+		Alias:       p.Alias,
+		Regions:     p.Regions,
+		Coordinates: p.Coordinates,
+		Province:    p.Province,
+		Timezone:    p.Timezone,
+		Unlocs:      p.Unlocs,
+		Code:        p.Code,
+	}
+	err = l.domain.Create(ctx, ports.NewPort{Port: domainPort})
+	if err != nil {
+		return fmt.Errorf("creating port with id %s: %w", id, err)
+	}
+
+	return nil
+}
+
+func (*JSON) decodePort(decoder *json.Decoder) (string, port, error) {
+	var id string
+	var p port
+	idToken, err := decoder.Token()
+	if err != nil {
+		return "", port{}, fmt.Errorf("reading id token: %w", err)
+	}
+
+	id = idToken.(string)
+
+	err = decoder.Decode(&p)
+	if err != nil {
+		return "", port{}, fmt.Errorf("decoding port: %w", err)
+	}
+
+	return id, p, nil
 }

@@ -19,8 +19,8 @@ func TestCreatePort(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -51,8 +51,8 @@ func TestCreatePort_AlreadyExisting(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -95,8 +95,8 @@ func TestUpdatePort(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -187,8 +187,8 @@ func TestGetPort_existing_and_not_existing(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, res.StatusCode, "getting not existing port")
 
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -247,8 +247,8 @@ func TestDeletePort_existing_not_existing(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, res.StatusCode, "deleting not existing port")
 
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -290,8 +290,8 @@ func TestList(t *testing.T) {
 
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 	portData := ports.NewPort{
-		ID: "AEAJM",
 		Port: ports.Port{
+			ID:          "AEAJM",
 			Name:        "Ajman",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
@@ -339,8 +339,8 @@ func TestList(t *testing.T) {
 	// adding another port
 
 	portdata2 := ports.NewPort{
-		ID: "AEAJM_2",
 		Port: ports.Port{
+			ID:          "AEAJM_2",
 			Name:        "Ajman_2",
 			City:        "Ajman",
 			Country:     "United Arab Emirates",
