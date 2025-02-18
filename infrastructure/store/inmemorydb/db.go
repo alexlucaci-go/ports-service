@@ -19,15 +19,15 @@ func NewInMemoryDB() *InMemoryDB {
 }
 
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
-func (db *InMemoryDB) Create(_ context.Context, id string, p ports.Port) error {
+func (db *InMemoryDB) Create(_ context.Context, np ports.NewPort) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	if _, ok := db.data[id]; ok {
+	if _, ok := db.data[np.ID]; ok {
 		return ports.ErrAlreadyExists
 	}
 
-	db.data[id] = p
+	db.data[np.ID] = np.Port
 	return nil
 }
 

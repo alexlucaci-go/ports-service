@@ -14,7 +14,7 @@ var ErrIncorrectLatitudeOrLongitudeValues = errors.New(
 		" -90 to 90 and longitude from -180 to 180")
 
 type Storer interface {
-	Create(context.Context, string, Port) error
+	Create(context.Context, NewPort) error
 	Update(context.Context, string, UpdatePort) error
 	Get(context.Context, string) (Port, error)
 	Delete(ctx context.Context, id string) error
@@ -40,7 +40,7 @@ func (d *Domain) Create(ctx context.Context, np NewPort) error {
 		return ErrIncorrectLatitudeOrLongitudeValues
 	}
 
-	err := d.store.Create(ctx, np.ID, np.Port)
+	err := d.store.Create(ctx, np)
 	if err != nil {
 		return fmt.Errorf("calling store create: %w", err)
 	}

@@ -9,13 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testID = "AEAJM"
+const testID = "AEAJM_1"
 
 func TestSavePort(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -28,10 +29,10 @@ func TestSavePort(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating port")
 
-	savedPort, err := store.Get(ctx, testID)
+	savedPort, err := store.Get(ctx, port.ID)
 	require.NoError(t, err, "getting port after creation")
 	require.NotNil(t, savedPort)
 	require.Equal(t, port, savedPort, "comparing saved port with original port")
@@ -42,6 +43,7 @@ func TestSavePort_AlreadyExistingID(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -54,10 +56,10 @@ func TestSavePort_AlreadyExistingID(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating port")
 
-	err = store.Create(ctx, testID, port)
+	err = store.Create(ctx, ports.NewPort{Port: port})
 	require.Error(t, err, "creating port with already existing testID")
 	require.Equal(t, ports.ErrAlreadyExists, err, "checking error type")
 }
@@ -67,6 +69,7 @@ func TestUpdatePort_OneField(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -79,20 +82,20 @@ func TestUpdatePort_OneField(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating port")
 
 	up := ports.UpdatePort{
 		Name: ports.StringToPointerString("Ajman_test"),
 	}
 
-	err = store.Update(ctx, testID, up)
+	err = store.Update(ctx, port.ID, up)
 	require.NoError(t, err, "updating port")
 
 	updatedPort := port
 	updatedPort.Name = "Ajman_test"
 
-	savedPort, err := store.Get(ctx, testID)
+	savedPort, err := store.Get(ctx, port.ID)
 	require.NoError(t, err, "getting saved port after update")
 	require.NotNil(t, savedPort)
 	require.Equal(t, updatedPort, savedPort, "comparing updated port with saved port")
@@ -107,7 +110,7 @@ func TestUpdatePort_NotExistingID(t *testing.T) {
 		Name: ports.StringToPointerString("Ajman_test"),
 	}
 
-	err := store.Update(ctx, testID, up)
+	err := store.Update(ctx, "AEAJM", up)
 	require.Error(t, err, "updating port with not existing testID")
 	require.Equal(t, ports.ErrNotFound, err, "checking error type")
 }
@@ -117,6 +120,7 @@ func TestUpdatePort_EmptyUpdate(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -129,15 +133,15 @@ func TestUpdatePort_EmptyUpdate(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating port")
 
 	up := ports.UpdatePort{}
 
-	err = store.Update(ctx, testID, up)
+	err = store.Update(ctx, port.ID, up)
 	require.NoError(t, err, "updating port with empty update")
 
-	savedPort, err := store.Get(ctx, testID)
+	savedPort, err := store.Get(ctx, port.ID)
 	require.NoError(t, err, "getting port after update")
 
 	require.NotNil(t, savedPort)
@@ -149,6 +153,7 @@ func TestDeletePort(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -161,17 +166,17 @@ func TestDeletePort(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating port")
 
-	got, err := store.Get(ctx, testID)
+	got, err := store.Get(ctx, port.ID)
 	require.NoError(t, err, "getting port after creation")
 	require.NotEmpty(t, got)
 
-	err = store.Delete(ctx, testID)
+	err = store.Delete(ctx, port.ID)
 	require.NoError(t, err, "deleting port")
 
-	_, err = store.Get(ctx, testID)
+	_, err = store.Get(ctx, port.ID)
 	require.EqualError(t, err, ports.ErrNotFound.Error())
 }
 
@@ -180,6 +185,7 @@ func TestListPorts_limit_less_than_length(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -192,10 +198,12 @@ func TestListPorts_limit_less_than_length(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 1st port")
 
-	err = store.Create(ctx, testID+"_1", port)
+	port.ID = testID
+
+	err = store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 2nd port")
 
 	listedPorts, err := store.List(ctx, 1)
@@ -208,6 +216,7 @@ func TestListPorts_limit_equal_with_length(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -220,10 +229,12 @@ func TestListPorts_limit_equal_with_length(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 1st port")
 
-	err = store.Create(ctx, testID+"_1", port)
+	port.ID = testID
+
+	err = store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 2nd port")
 
 	listedPorts, err := store.List(ctx, 2)
@@ -236,6 +247,7 @@ func TestListPorts_limit_greater_than_length(t *testing.T) {
 	ctx := context.Background()
 	store := NewInMemoryDB()
 	port := ports.Port{
+		ID:          "AEAJM",
 		Name:        "Ajman",
 		City:        "Ajman",
 		Country:     "United Arab Emirates",
@@ -248,10 +260,12 @@ func TestListPorts_limit_greater_than_length(t *testing.T) {
 		Code:        "52000",
 	}
 
-	err := store.Create(ctx, testID, port)
+	err := store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 1st port")
 
-	err = store.Create(ctx, testID+"_1", port)
+	port.ID = testID
+
+	err = store.Create(ctx, ports.NewPort{Port: port})
 	require.NoError(t, err, "creating 2nd port")
 
 	listedPorts, err := store.List(ctx, 3)
