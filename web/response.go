@@ -31,12 +31,15 @@ func RespondError(ctx context.Context, w http.ResponseWriter, err error) error {
 	var res interface{}
 	var code int
 
-	switch v := errors.Cause(err).(type) {
-	case *RequestError:
-		res = ErrorResponse{Error: v.Err.Error()}
-		code = v.Status
-	case *FieldsValidationError:
-		res = ErrorResponse{Error: v.Err.Error()} // should also include the fields error from the FieldErrors field
+	var reqError *RequestError
+	var fieldsError *FieldsValidationError
+
+	switch {
+	case errors.As(err, &reqError):
+		res = ErrorResponse{Error: reqError.Err.Error()}
+		code = reqError.Status
+	case errors.As(err, &fieldsError):
+		res = ErrorResponse{Error: fieldsError.Err.Error()} // should also include the fields error from the FieldErrors field
 		code = http.StatusBadRequest
 	default:
 		code = http.StatusInternalServerError
