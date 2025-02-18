@@ -46,3 +46,21 @@ $ curl -X PATCH "http://localhost:8000/v1/ports/TEST_PORT_ID" \
            "code": "53000"
          }'
 ```
+
+### Getting port by id
+```bash
+$ curl -X GET "http://localhost:8000/v1/ports/ZWUTA" \
+      -H "Content-Type: application/json"
+```
+
+### Listing ports (max 5 randomly)
+```bash
+$ curl -X GET "http://localhost:8000/v1/ports" \
+      -H "Content-Type: application/json"
+```
+
+### Deleting port by id
+```bash
+$ curl -X DELETE "http://localhost:8000/v1/ports/ZWUTA" \
+      -H "Content-Type: application/json"
+```
