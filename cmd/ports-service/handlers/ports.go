@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/web"
-	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -23,10 +24,10 @@ func (ph *portsHandler) Create(ctx context.Context, w http.ResponseWriter, r *ht
 	err := ph.domain.Create(ctx, np)
 	if err != nil {
 		switch {
-		case errors.As(err, &ports.ErrAlreadyExists):
+		case errors.Is(err, ports.ErrAlreadyExists):
 			return web.NewRequestError(errors.New("a resource with provided id already exists"), http.StatusConflict)
 		default:
-			return web.RespondError(ctx, w, errors.Wrap(err, "creating port"))
+			return web.RespondError(ctx, w, fmt.Errorf("creating port: %w", err))
 		}
 	}
 
@@ -47,16 +48,16 @@ func (ph *portsHandler) Update(ctx context.Context, w http.ResponseWriter, r *ht
 	err := ph.domain.Update(ctx, id, up)
 	if err != nil {
 		switch {
-		case errors.As(err, &ports.ErrNotFound):
+		case errors.Is(err, ports.ErrNotFound):
 			return web.NewRequestError(errors.New("resource with provided id is not found"), http.StatusNotFound)
 		default:
-			return web.RespondError(ctx, w, errors.Wrap(err, "updating port"))
+			return web.RespondError(ctx, w, fmt.Errorf("updating port: %w", err))
 		}
 	}
 
 	updatedPort, err := ph.domain.Get(ctx, id)
 	if err != nil {
-		return web.RespondError(ctx, w, errors.Wrap(err, "getting updated port"))
+		return web.RespondError(ctx, w, fmt.Errorf("getting updated port: %w", err))
 	}
 
 	return web.Respond(ctx, w, updatedPort, http.StatusOK)
@@ -71,10 +72,10 @@ func (ph *portsHandler) Get(ctx context.Context, w http.ResponseWriter, r *http.
 	port, err := ph.domain.Get(ctx, id)
 	if err != nil {
 		switch {
-		case errors.As(err, &ports.ErrNotFound):
+		case errors.Is(err, ports.ErrNotFound):
 			return web.NewRequestError(errors.New("resource with provided id is not found"), http.StatusNotFound)
 		default:
-			return web.RespondError(ctx, w, errors.Wrap(err, "getting port"))
+			return web.RespondError(ctx, w, fmt.Errorf("getting port: %w", err))
 		}
 	}
 
@@ -90,10 +91,10 @@ func (ph *portsHandler) Delete(ctx context.Context, w http.ResponseWriter, r *ht
 	err := ph.domain.Delete(ctx, id)
 	if err != nil {
 		switch {
-		case errors.As(err, &ports.ErrNotFound):
+		case errors.Is(err, ports.ErrNotFound):
 			return web.NewRequestError(errors.New("resource with provided id is not found"), http.StatusNotFound)
 		default:
-			return web.RespondError(ctx, w, errors.Wrap(err, "deleting port"))
+			return web.RespondError(ctx, w, fmt.Errorf("deleting port: %w", err))
 		}
 	}
 
@@ -104,7 +105,7 @@ func (ph *portsHandler) List(ctx context.Context, w http.ResponseWriter, _ *http
 	// will use a hardcoded limit for demo purposes
 	listedPorts, err := ph.domain.List(ctx, fixedListLimit)
 	if err != nil {
-		return web.RespondError(ctx, w, errors.Wrap(err, "listing ports"))
+		return web.RespondError(ctx, w, fmt.Errorf("listing ports: %w", err))
 	}
 
 	return web.Respond(ctx, w, listedPorts, http.StatusOK)
