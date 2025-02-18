@@ -2,16 +2,18 @@ package loader
 
 import (
 	"context"
+	"testing"
+
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/domain/ports/store/inmemorydb"
+
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestJsonLoader(t *testing.T) {
 	t.Parallel()
 	portdomain := ports.NewDomain(inmemorydb.NewInMemoryDB())
-	jsonLoader := NewJson(portdomain)
+	jsonLoader := NewJSON(portdomain)
 	err := jsonLoader.LoadFromFile(context.Background(), "ports_test.json")
 	require.NoError(t, err)
 

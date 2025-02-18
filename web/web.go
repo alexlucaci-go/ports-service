@@ -23,8 +23,7 @@ func NewService(shutdown chan os.Signal) Service {
 	}
 }
 
-func (s Service) Handle(method string, path string, handler Handler) {
-
+func (s Service) Handle(method, path string, handler Handler) {
 	handler = errorsMid()(handler)
 	// add other middlewares here
 	// handler = loggerMid()(handler)

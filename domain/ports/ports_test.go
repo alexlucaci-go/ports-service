@@ -1,8 +1,10 @@
 package ports
 
 import (
-	"github.com/stretchr/testify/require"
+	"context"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreate_not_all_coordinates(t *testing.T) {
@@ -68,7 +70,7 @@ func TestCreate_not_all_coordinates(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			d := NewDomain(nil)
-			err := d.Create(nil, tc.np)
+			err := d.Create(context.Background(), tc.np)
 			require.EqualError(t, err, tc.expectedError.Error())
 		})
 	}

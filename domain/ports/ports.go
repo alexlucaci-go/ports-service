@@ -9,7 +9,9 @@ import (
 var ErrNotFound = errors.New("store resource not found")
 var ErrAlreadyExists = errors.New("store resource already exists")
 var ErrNoCoordinates = errors.New("both coordinates are required")
-var ErrIncorrectLatitudeOrLongitudeValues = errors.New("incorrect latitude or longitude. latitude should range from -90 to 90 and longitude from -180 to 180")
+var ErrIncorrectLatitudeOrLongitudeValues = errors.New(
+	"incorrect latitude or longitude. latitude should range from" +
+		" -90 to 90 and longitude from -180 to 180")
 
 type Storer interface {
 	Create(context.Context, string, Port) error
@@ -27,6 +29,7 @@ func NewDomain(store Storer) *Domain {
 	return &Domain{store: store}
 }
 
+//nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
 func (d *Domain) Create(ctx context.Context, np NewPort) error {
 	// Do some domain logic here like adding creation date or some other business logic checks
 	if len(np.Port.Coordinates) != 2 {
@@ -45,6 +48,7 @@ func (d *Domain) Create(ctx context.Context, np NewPort) error {
 	return nil
 }
 
+//nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
 func (d *Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	// Do some domain logic here like adding update date or some other business logic checks
 	err := d.store.Update(ctx, id, up)

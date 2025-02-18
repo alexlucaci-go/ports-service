@@ -15,7 +15,7 @@ func (err *RequestError) Error() string {
 
 type FieldsValidationError struct {
 	Err         error
-	FieldErrors interface{} // should include the descriptions of each field that failed validation
+	FieldErrors any // should include the descriptions of each field that failed validation
 }
 
 func (err *FieldsValidationError) Error() string {

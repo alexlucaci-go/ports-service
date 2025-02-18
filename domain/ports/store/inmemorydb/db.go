@@ -2,8 +2,9 @@ package inmemorydb
 
 import (
 	"context"
-	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"sync"
+
+	"github.com/alexlucaci-go/ports-service/domain/ports"
 )
 
 type InMemoryDB struct {
@@ -17,7 +18,8 @@ func NewInMemoryDB() *InMemoryDB {
 	}
 }
 
-func (db *InMemoryDB) Create(ctx context.Context, id string, p ports.Port) error {
+//nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
+func (db *InMemoryDB) Create(_ context.Context, id string, p ports.Port) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -29,7 +31,8 @@ func (db *InMemoryDB) Create(ctx context.Context, id string, p ports.Port) error
 	return nil
 }
 
-func (db *InMemoryDB) Update(ctx context.Context, id string, up ports.UpdatePort) error {
+//nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
+func (db *InMemoryDB) Update(_ context.Context, id string, up ports.UpdatePort) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -73,7 +76,7 @@ func (db *InMemoryDB) Update(ctx context.Context, id string, up ports.UpdatePort
 	return nil
 }
 
-func (db *InMemoryDB) Get(ctx context.Context, id string) (ports.Port, error) {
+func (db *InMemoryDB) Get(_ context.Context, id string) (ports.Port, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
@@ -85,7 +88,7 @@ func (db *InMemoryDB) Get(ctx context.Context, id string) (ports.Port, error) {
 	return p, nil
 }
 
-func (db *InMemoryDB) Delete(ctx context.Context, id string) error {
+func (db *InMemoryDB) Delete(_ context.Context, id string) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -102,7 +105,7 @@ func (db *InMemoryDB) Delete(ctx context.Context, id string) error {
 // List will list store ports; given the fact that the underlying implementation
 // is using a map, subsequent calls to List using the same limit will not return the same data
 // because iterating over map keys is not deterministic
-func (db *InMemoryDB) List(ctx context.Context, limit int) ([]ports.Port, error) {
+func (db *InMemoryDB) List(_ context.Context, limit int) ([]ports.Port, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
@@ -112,11 +115,11 @@ func (db *InMemoryDB) List(ctx context.Context, limit int) ([]ports.Port, error)
 
 	res := make([]ports.Port, 0, limit)
 	count := 0
-	for _, p := range db.data {
+	for key := range db.data {
 		if count == limit {
 			break
 		}
-		res = append(res, p)
+		res = append(res, db.data[key])
 		count++
 	}
 

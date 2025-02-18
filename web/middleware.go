@@ -19,8 +19,8 @@ func errorsMid() middleware {
 			if err := before(ctx, w, r); err != nil {
 				log.Printf("ERROR : %v\n", err)
 
-				if err := RespondError(ctx, w, err); err != nil {
-					return err
+				if innerErr := RespondError(ctx, w, err); innerErr != nil {
+					return innerErr
 				}
 			}
 

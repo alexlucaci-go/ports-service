@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statusCode int) error {
+func Respond(_ context.Context, w http.ResponseWriter, data any, statusCode int) error {
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(statusCode)
 		return nil
@@ -28,7 +28,7 @@ func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statu
 }
 
 func RespondError(ctx context.Context, w http.ResponseWriter, err error) error {
-	var res interface{}
+	var res any
 	var code int
 
 	var reqError *RequestError
