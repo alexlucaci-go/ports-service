@@ -21,6 +21,8 @@ type Storer interface {
 	List(ctx context.Context, limit int) ([]Port, error)
 }
 
+type TestStore struct{}
+
 type Domain struct {
 	store Storer
 }
@@ -51,6 +53,17 @@ func (d Domain) Create(ctx context.Context, np NewPort) error {
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
 func (d Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	// Do some domain logic here like adding update date or some other business logic checks
+	if up.Coordinates != nil {
+		coords := *up.Coordinates
+		if len(coords) != 2 {
+			return ErrNoCoordinates
+		}
+
+		if coords[0] < -180 || coords[0] > 180 || coords[1] < -90 || coords[1] > 90 {
+			return ErrIncorrectLatitudeOrLongitudeValues
+		}
+	}
+
 	err := d.store.Update(ctx, id, up)
 	if err != nil {
 		return fmt.Errorf("calling store update: %w", err)
