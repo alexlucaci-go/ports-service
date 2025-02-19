@@ -7,23 +7,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (t TestStore) Create(ctx context.Context, port NewPort) error {
+//nolint:gocritic // test
+func (TestStore) Create(_ context.Context, _ NewPort) error {
 	return nil
 }
 
-func (t TestStore) Update(ctx context.Context, s string, port UpdatePort) error {
+//nolint:gocritic // test
+func (TestStore) Update(_ context.Context, _ string, _ UpdatePort) error {
 	return nil
 }
 
-func (t TestStore) Get(ctx context.Context, s string) (Port, error) {
+func (TestStore) Get(_ context.Context, _ string) (Port, error) {
 	return Port{}, nil
 }
 
-func (t TestStore) Delete(ctx context.Context, id string) error {
+func (TestStore) Delete(_ context.Context, _ string) error {
 	return nil
 }
 
-func (t TestStore) List(ctx context.Context, limit int) ([]Port, error) {
+func (TestStore) List(_ context.Context, _ int) ([]Port, error) {
 	return nil, nil
 }
 
@@ -151,7 +153,7 @@ func TestUpdate_not_all_coordinates(t *testing.T) {
 			d := NewDomain(TestStore{})
 			err := d.Update(context.Background(), "", tc.up)
 			if tc.expectedError == nil {
-				require.Empty(t, err, "updating")
+				require.NoError(t, err, "updating")
 				return
 			}
 			require.EqualError(t, err, tc.expectedError.Error(), "updating")
