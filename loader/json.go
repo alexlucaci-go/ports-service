@@ -9,16 +9,20 @@ import (
 	"os"
 	"time"
 
-	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/alexlucaci-go/ports-service/models"
 )
+
+type PortCreator interface {
+	Create(ctx context.Context, cp models.CreatePort) error
+}
 
 type JSON struct {
 	perPortDecodeTimeout time.Duration
-	domain               ports.Domain
+	portCreator          PortCreator
 }
 
-func NewJSON(domain ports.Domain, perPortDecodeTimeout time.Duration) *JSON {
-	return &JSON{domain: domain, perPortDecodeTimeout: perPortDecodeTimeout}
+func NewJSON(portCreator PortCreator, perPortDecodeTimeout time.Duration) *JSON {
+	return &JSON{portCreator: portCreator, perPortDecodeTimeout: perPortDecodeTimeout}
 }
 
 func (l JSON) LoadFromFile(filePath string) error {
@@ -69,7 +73,7 @@ func (l JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) er
 		return fmt.Errorf("decoding port: %w", err)
 	}
 
-	domainPort := ports.Port{
+	domainPort := models.CreatePort{
 		ID:          id,
 		Name:        p.Name,
 		City:        p.City,
@@ -82,7 +86,7 @@ func (l JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) er
 		Unlocs:      p.Unlocs,
 		Code:        p.Code,
 	}
-	err = l.domain.Create(ctx, ports.NewPort{Port: domainPort})
+	err = l.portCreator.Create(ctx, domainPort)
 	if err != nil {
 		return fmt.Errorf("creating port with id %s: %w", id, err)
 	}

@@ -5,84 +5,54 @@ import (
 	"sync"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/alexlucaci-go/ports-service/entities"
 )
 
 type InMemoryDB struct {
-	data map[string]ports.Port
+	data map[string]entities.Port
 	mu   sync.RWMutex
 }
 
 func NewInMemoryDB() *InMemoryDB {
 	return &InMemoryDB{
-		data: make(map[string]ports.Port),
+		data: make(map[string]entities.Port),
 	}
 }
 
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
-func (db *InMemoryDB) Create(_ context.Context, np ports.NewPort) error {
+func (db *InMemoryDB) Create(_ context.Context, p entities.Port) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	if _, ok := db.data[np.ID]; ok {
+	if _, ok := db.data[p.ID]; ok {
 		return ports.ErrAlreadyExists
 	}
 
-	db.data[np.ID] = np.Port
+	db.data[p.ID] = p
 	return nil
 }
 
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
-func (db *InMemoryDB) Update(_ context.Context, id string, up ports.UpdatePort) error {
+func (db *InMemoryDB) Update(_ context.Context, p entities.Port) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	port, ok := db.data[id]
+	_, ok := db.data[p.ID]
 	if !ok {
 		return ports.ErrNotFound
 	}
 
-	if up.Name != nil {
-		port.Name = *up.Name
-	}
-	if up.City != nil {
-		port.City = *up.City
-	}
-	if up.Country != nil {
-		port.Country = *up.Country
-	}
-	if up.Alias != nil {
-		port.Alias = *up.Alias
-	}
-	if up.Regions != nil {
-		port.Regions = *up.Regions
-	}
-	if up.Coordinates != nil {
-		port.Coordinates = *up.Coordinates
-	}
-	if up.Province != nil {
-		port.Province = *up.Province
-	}
-	if up.Timezone != nil {
-		port.Timezone = *up.Timezone
-	}
-	if up.Unlocs != nil {
-		port.Unlocs = *up.Unlocs
-	}
-	if up.Code != nil {
-		port.Code = *up.Code
-	}
-
-	db.data[id] = port
+	db.data[p.ID] = p
 	return nil
 }
 
-func (db *InMemoryDB) Get(_ context.Context, id string) (ports.Port, error) {
+func (db *InMemoryDB) Get(_ context.Context, id string) (entities.Port, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
 	p, ok := db.data[id]
 	if !ok {
-		return ports.Port{}, ports.ErrNotFound
+		return entities.Port{}, ports.ErrNotFound
 	}
 
 	return p, nil
@@ -105,7 +75,7 @@ func (db *InMemoryDB) Delete(_ context.Context, id string) error {
 // List will list store ports; given the fact that the underlying implementation
 // is using a map, subsequent calls to List using the same limit will not return the same data
 // because iterating over map keys is not deterministic
-func (db *InMemoryDB) List(_ context.Context, limit int) ([]ports.Port, error) {
+func (db *InMemoryDB) List(_ context.Context, limit int) ([]entities.Port, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
@@ -113,7 +83,7 @@ func (db *InMemoryDB) List(_ context.Context, limit int) ([]ports.Port, error) {
 		limit = len(db.data)
 	}
 
-	res := make([]ports.Port, 0, limit)
+	res := make([]entities.Port, 0, limit)
 	count := 0
 	for key := range db.data {
 		if count == limit {

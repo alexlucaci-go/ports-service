@@ -56,7 +56,7 @@ func run() error {
 	// load the initial state of the ports from the json file
 
 	db := inmemorydb.NewInMemoryDB()
-	portDomain := ports.NewDomain(db)
+	portDomain := ports.NewService(db)
 	jsonLoader := loader.NewJSON(portDomain, cfg.Loader.PerPortDecodeTimeout)
 
 	err := jsonLoader.LoadFromFile("ports.json")

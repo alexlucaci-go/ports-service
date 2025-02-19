@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/alexlucaci-go/ports-service/entities"
+	"github.com/alexlucaci-go/ports-service/models"
 )
 
 var ErrNotFound = errors.New("store resource not found")
@@ -14,35 +17,33 @@ var ErrIncorrectLatitudeOrLongitudeValues = errors.New(
 		" -90 to 90 and longitude from -180 to 180")
 
 type Storer interface {
-	Create(context.Context, NewPort) error
-	Update(context.Context, string, UpdatePort) error
-	Get(context.Context, string) (Port, error)
+	Create(ctx context.Context, port entities.Port) error
+	Update(ctx context.Context, port entities.Port) error
+	Get(ctx context.Context, id string) (entities.Port, error)
 	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, limit int) ([]Port, error)
+	List(ctx context.Context, limit int) ([]entities.Port, error)
 }
 
-type TestStore struct{}
-
-type Domain struct {
+type Service struct {
 	store Storer
 }
 
-func NewDomain(store Storer) Domain {
-	return Domain{store: store}
+func NewService(store Storer) Service {
+	return Service{store: store}
 }
 
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
-func (d Domain) Create(ctx context.Context, np NewPort) error {
+func (d Service) Create(ctx context.Context, cp models.CreatePort) error {
 	// Do some domain logic here like adding creation date or some other business logic checks
-	if len(np.Port.Coordinates) != 2 {
+	if len(cp.Coordinates) != 2 {
 		return ErrNoCoordinates
 	}
 
-	if np.Port.Coordinates[0] < -180 || np.Port.Coordinates[0] > 180 || np.Port.Coordinates[1] < -90 || np.Port.Coordinates[1] > 90 {
+	if cp.Coordinates[0] < -180 || cp.Coordinates[0] > 180 || cp.Coordinates[1] < -90 || cp.Coordinates[1] > 90 {
 		return ErrIncorrectLatitudeOrLongitudeValues
 	}
 
-	err := d.store.Create(ctx, np)
+	err := d.store.Create(ctx, entities.Port(cp))
 	if err != nil {
 		return fmt.Errorf("calling store create: %w", err)
 	}
@@ -51,8 +52,13 @@ func (d Domain) Create(ctx context.Context, np NewPort) error {
 }
 
 //nolint:gocritic // it is intentionally passed as value as I don't want any unnecessary pointers to be passed
-func (d Domain) Update(ctx context.Context, id string, up UpdatePort) error {
+func (d Service) Update(ctx context.Context, id string, up models.UpdatePort) error {
 	// Do some domain logic here like adding update date or some other business logic checks
+	port, err := d.store.Get(ctx, id)
+	if err != nil {
+		return fmt.Errorf("calling store get: %w", err)
+	}
+
 	if up.Coordinates != nil {
 		coords := *up.Coordinates
 		if len(coords) != 2 {
@@ -64,7 +70,38 @@ func (d Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 		}
 	}
 
-	err := d.store.Update(ctx, id, up)
+	if up.Name != nil {
+		port.Name = *up.Name
+	}
+	if up.City != nil {
+		port.City = *up.City
+	}
+	if up.Country != nil {
+		port.Country = *up.Country
+	}
+	if up.Alias != nil {
+		port.Alias = *up.Alias
+	}
+	if up.Regions != nil {
+		port.Regions = *up.Regions
+	}
+	if up.Coordinates != nil {
+		port.Coordinates = *up.Coordinates
+	}
+	if up.Province != nil {
+		port.Province = *up.Province
+	}
+	if up.Timezone != nil {
+		port.Timezone = *up.Timezone
+	}
+	if up.Unlocs != nil {
+		port.Unlocs = *up.Unlocs
+	}
+	if up.Code != nil {
+		port.Code = *up.Code
+	}
+
+	err = d.store.Update(ctx, port)
 	if err != nil {
 		return fmt.Errorf("calling store update: %w", err)
 	}
@@ -72,16 +109,16 @@ func (d Domain) Update(ctx context.Context, id string, up UpdatePort) error {
 	return nil
 }
 
-func (d Domain) Get(ctx context.Context, id string) (Port, error) {
+func (d Service) Get(ctx context.Context, id string) (models.Port, error) {
 	port, err := d.store.Get(ctx, id)
 	if err != nil {
-		return Port{}, fmt.Errorf("calling store get: %w", err)
+		return models.Port{}, fmt.Errorf("calling store get: %w", err)
 	}
 
-	return port, nil
+	return models.Port(port), nil
 }
 
-func (d Domain) Delete(ctx context.Context, id string) error {
+func (d Service) Delete(ctx context.Context, id string) error {
 	err := d.store.Delete(ctx, id)
 	if err != nil {
 		return fmt.Errorf("calling store delete: %w", err)
@@ -90,11 +127,16 @@ func (d Domain) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (d Domain) List(ctx context.Context, limit int) ([]Port, error) {
+func (d Service) List(ctx context.Context, limit int) ([]models.Port, error) {
 	ports, err := d.store.List(ctx, limit)
 	if err != nil {
 		return nil, fmt.Errorf("calling store list: %w", err)
 	}
 
-	return ports, nil
+	retPorts := make([]models.Port, 0, len(ports))
+	for i := range ports {
+		retPorts = append(retPorts, models.Port(ports[i]))
+	}
+
+	return retPorts, nil
 }
