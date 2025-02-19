@@ -33,7 +33,7 @@ func run() error {
 			ShutdownTimeout time.Duration
 		}
 		Loader struct {
-			Timeout time.Duration
+			PerPortDecodeTimeout time.Duration
 		}
 	}
 
@@ -49,21 +49,17 @@ func run() error {
 			WriteTimeout:    10 * time.Second,
 			ShutdownTimeout: 5 * time.Second,
 		},
-		Loader: struct{ Timeout time.Duration }{
-			Timeout: 5 * time.Minute,
+		Loader: struct{ PerPortDecodeTimeout time.Duration }{
+			PerPortDecodeTimeout: 1 * time.Second,
 		},
 	}
 	// load the initial state of the ports from the json file
 
 	db := inmemorydb.NewInMemoryDB()
-	portdomain := ports.NewDomain(db)
-	jsonLoader := loader.NewJSON(portdomain)
+	portDomain := ports.NewDomain(db)
+	jsonLoader := loader.NewJSON(portDomain, cfg.Loader.PerPortDecodeTimeout)
 
-	// configure loader to timeout after a certain time
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Loader.Timeout)
-	defer cancel()
-
-	err := jsonLoader.LoadFromFile(ctx, "ports.json")
+	err := jsonLoader.LoadFromFile("ports.json")
 	if err != nil {
 		return fmt.Errorf("loading ports from file: %w", err)
 	}
