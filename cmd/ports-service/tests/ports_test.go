@@ -9,8 +9,9 @@ import (
 	"testing"
 
 	"github.com/alexlucaci-go/ports-service/cmd/ports-service/handlers"
-	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/infrastructure/store/inmemorydb"
+	"github.com/alexlucaci-go/ports-service/models"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
@@ -18,20 +19,18 @@ import (
 func TestCreatePort(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, _ := json.Marshal(portData)
@@ -50,20 +49,18 @@ func TestCreatePort(t *testing.T) {
 func TestCreatePort_AlreadyExisting(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, err := json.Marshal(portData)
@@ -94,20 +91,18 @@ func TestCreatePort_AlreadyExisting(t *testing.T) {
 func TestUpdatePort(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, err := json.Marshal(portData)
@@ -124,8 +119,8 @@ func TestUpdatePort(t *testing.T) {
 
 	require.Equal(t, http.StatusCreated, res.StatusCode)
 
-	var up ports.UpdatePort
-	up.Name = ports.StringToPointerString("New Ajman")
+	var up models.UpdatePort
+	up.Name = models.StringToPointerString("New Ajman")
 	body, err = json.Marshal(up)
 	require.NoError(t, err, "marshaling request body")
 
@@ -138,10 +133,10 @@ func TestUpdatePort(t *testing.T) {
 	res = rec.Result()
 	defer res.Body.Close()
 
-	expectedPortData := portData.Port
+	expectedPortData := models.Port(portData)
 	expectedPortData.Name = "New Ajman"
 
-	var got ports.Port
+	var got models.Port
 	err = json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
 
@@ -155,8 +150,8 @@ func TestUpdatePort_NotExisting(t *testing.T) {
 	t.Parallel()
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
 
-	var up ports.UpdatePort
-	up.Name = ports.StringToPointerString("New Ajman")
+	var up models.UpdatePort
+	up.Name = models.StringToPointerString("New Ajman")
 	body, err := json.Marshal(up)
 	require.NoError(t, err, "marshaling request body")
 
@@ -186,20 +181,18 @@ func TestGetPort_existing_and_not_existing(t *testing.T) {
 	res := rec.Result()
 	require.Equal(t, http.StatusNotFound, res.StatusCode, "getting not existing port")
 
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, _ := json.Marshal(portData)
@@ -224,11 +217,11 @@ func TestGetPort_existing_and_not_existing(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, res.StatusCode, "getting existing port")
 
-	var got ports.Port
+	var got models.Port
 	err := json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
 
-	diff := cmp.Diff(portData.Port, got)
+	diff := cmp.Diff(models.Port(portData), got)
 	require.Empty(t, diff)
 }
 
@@ -246,20 +239,18 @@ func TestDeletePort_existing_not_existing(t *testing.T) {
 	res := rec.Result()
 	require.Equal(t, http.StatusNotFound, res.StatusCode, "deleting not existing port")
 
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, _ := json.Marshal(portData)
@@ -289,20 +280,18 @@ func TestList(t *testing.T) {
 	t.Parallel()
 
 	api := handlers.API(make(chan os.Signal), inmemorydb.NewInMemoryDB())
-	portData := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM",
-			Name:        "Ajman",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM"},
-			Code:        "52000",
-		},
+	portData := models.CreatePort{
+		ID:          "AEAJM",
+		Name:        "Ajman",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM"},
+		Code:        "52000",
 	}
 
 	body, _ := json.Marshal(portData)
@@ -330,28 +319,26 @@ func TestList(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, res.StatusCode, "listing ports")
 
-	var got []ports.Port
+	var got []models.Port
 	err := json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
-	diff := cmp.Diff([]ports.Port{portData.Port}, got)
+	diff := cmp.Diff([]models.Port{models.Port(portData)}, got)
 	require.Empty(t, diff)
 
 	// adding another port
 
-	portdata2 := ports.NewPort{
-		Port: ports.Port{
-			ID:          "AEAJM_2",
-			Name:        "Ajman_2",
-			City:        "Ajman",
-			Country:     "United Arab Emirates",
-			Alias:       []string{},
-			Regions:     []string{},
-			Coordinates: []float64{55.5136433, 25.4052165},
-			Province:    "Ajman",
-			Timezone:    "Asia/Dubai",
-			Unlocs:      []string{"AEAJM_2"},
-			Code:        "52000",
-		},
+	portdata2 := models.CreatePort{
+		ID:          "AEAJM_2",
+		Name:        "Ajman_2",
+		City:        "Ajman",
+		Country:     "United Arab Emirates",
+		Alias:       []string{},
+		Regions:     []string{},
+		Coordinates: []float64{55.5136433, 25.4052165},
+		Province:    "Ajman",
+		Timezone:    "Asia/Dubai",
+		Unlocs:      []string{"AEAJM_2"},
+		Code:        "52000",
 	}
 
 	body, _ = json.Marshal(portdata2)
@@ -379,7 +366,7 @@ func TestList(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, res.StatusCode, "listing ports")
 
-	got = []ports.Port{}
+	got = []models.Port{}
 	err = json.NewDecoder(res.Body).Decode(&got)
 	require.NoError(t, err, "decoding response body")
 	require.Len(t, got, 2, "listing ports")

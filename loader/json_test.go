@@ -7,6 +7,7 @@ import (
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/infrastructure/store/inmemorydb"
+	"github.com/alexlucaci-go/ports-service/models"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -14,16 +15,16 @@ import (
 
 func TestJsonLoader(t *testing.T) {
 	t.Parallel()
-	portDomain := ports.NewDomain(inmemorydb.NewInMemoryDB())
-	jsonLoader := NewJSON(portDomain, 1*time.Second)
+	portService := ports.NewService(inmemorydb.NewInMemoryDB())
+	jsonLoader := NewJSON(portService, 1*time.Second)
 	err := jsonLoader.LoadFromFile("ports_test.json")
 	require.NoError(t, err)
 
 	// pick last port id from test file
-	got, err := portDomain.Get(context.Background(), "ZWUTA")
+	got, err := portService.Get(context.Background(), "ZWUTA")
 	require.NoError(t, err, "getting last port from file")
 
-	expected := ports.Port{
+	expected := models.Port{
 		ID:          "ZWUTA",
 		Name:        "Mutare",
 		City:        "Mutare",

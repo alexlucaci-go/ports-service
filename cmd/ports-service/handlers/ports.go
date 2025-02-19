@@ -7,22 +7,23 @@ import (
 	"net/http"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
+	"github.com/alexlucaci-go/ports-service/models"
 	"github.com/alexlucaci-go/ports-service/web"
 )
 
 const fixedListLimit = 5
 
 type portsHandler struct {
-	domain ports.Domain
+	domain ports.Service
 }
 
 func (ph portsHandler) Create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var np ports.NewPort
-	if err := web.Decode(r, &np); err != nil {
+	var cp models.CreatePort
+	if err := web.Decode(r, &cp); err != nil {
 		return err
 	}
 
-	err := ph.domain.Create(ctx, np)
+	err := ph.domain.Create(ctx, cp)
 	if err != nil {
 		switch {
 		case errors.Is(err, ports.ErrAlreadyExists):
@@ -32,7 +33,7 @@ func (ph portsHandler) Create(ctx context.Context, w http.ResponseWriter, r *htt
 		}
 	}
 
-	return web.Respond(w, np.Port, http.StatusCreated)
+	return web.Respond(w, cp, http.StatusCreated)
 }
 
 func (ph portsHandler) Update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -41,7 +42,7 @@ func (ph portsHandler) Update(ctx context.Context, w http.ResponseWriter, r *htt
 		return web.NewRequestError(errors.New("id path param is required"), http.StatusBadRequest)
 	}
 
-	var up ports.UpdatePort
+	var up models.UpdatePort
 	if err := web.Decode(r, &up); err != nil {
 		return err
 	}
