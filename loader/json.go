@@ -7,19 +7,21 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 )
 
 type JSON struct {
-	domain *ports.Domain
+	perPortDecodeTimeout time.Duration
+	domain               ports.Domain
 }
 
-func NewJSON(domain *ports.Domain) *JSON {
-	return &JSON{domain: domain}
+func NewJSON(domain ports.Domain, perPortDecodeTimeout time.Duration) *JSON {
+	return &JSON{domain: domain, perPortDecodeTimeout: perPortDecodeTimeout}
 }
 
-func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
+func (l JSON) LoadFromFile(filePath string) error {
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644) //nolint:mnd // 0644 is the default permission
 	if err != nil {
 		return fmt.Errorf("opening file: %w", err)
@@ -41,9 +43,19 @@ func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
 	// the entire token decoding can probably be done more nicely, but I didn't invest
 	// a lot of time in understanding how to do it properly
 	for decoder.More() {
-		err = l.decodeAndCreatePort(ctx, decoder)
-		if err != nil {
-			log.Printf("skipping port creation: %v\n", err)
+		decodeErr := func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), l.perPortDecodeTimeout)
+			defer cancel()
+
+			err = l.decodeAndCreatePort(ctx, decoder)
+			if err != nil {
+				return fmt.Errorf("decoding and creating port: %w", err)
+			}
+
+			return nil
+		}()
+		if decodeErr != nil {
+			log.Printf("skipping port creation: %v\n", decodeErr)
 			continue
 		}
 	}
@@ -51,7 +63,7 @@ func (l *JSON) LoadFromFile(ctx context.Context, filePath string) error {
 	return nil
 }
 
-func (l *JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) error {
+func (l JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) error {
 	id, p, err := l.decodePort(decoder)
 	if err != nil {
 		return fmt.Errorf("decoding port: %w", err)
@@ -78,7 +90,7 @@ func (l *JSON) decodeAndCreatePort(ctx context.Context, decoder *json.Decoder) e
 	return nil
 }
 
-func (*JSON) decodePort(decoder *json.Decoder) (string, port, error) {
+func (JSON) decodePort(decoder *json.Decoder) (string, port, error) {
 	var id string
 	var p port
 	idToken, err := decoder.Token()

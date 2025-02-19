@@ -1,13 +1,12 @@
 package web
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 )
 
-func Respond(_ context.Context, w http.ResponseWriter, data any, statusCode int) error {
+func Respond(w http.ResponseWriter, data any, statusCode int) error {
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(statusCode)
 		return nil
@@ -27,7 +26,7 @@ func Respond(_ context.Context, w http.ResponseWriter, data any, statusCode int)
 	return nil
 }
 
-func RespondError(ctx context.Context, w http.ResponseWriter, err error) error {
+func RespondError(w http.ResponseWriter, err error) error {
 	var res any
 	var code int
 
@@ -45,7 +44,7 @@ func RespondError(ctx context.Context, w http.ResponseWriter, err error) error {
 		code = http.StatusInternalServerError
 	}
 
-	if err := Respond(ctx, w, res, code); err != nil {
+	if err := Respond(w, res, code); err != nil {
 		return err
 	}
 

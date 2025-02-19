@@ -3,6 +3,7 @@ package loader
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/alexlucaci-go/ports-service/domain/ports"
 	"github.com/alexlucaci-go/ports-service/infrastructure/store/inmemorydb"
@@ -14,8 +15,8 @@ import (
 func TestJsonLoader(t *testing.T) {
 	t.Parallel()
 	portDomain := ports.NewDomain(inmemorydb.NewInMemoryDB())
-	jsonLoader := NewJSON(portDomain)
-	err := jsonLoader.LoadFromFile(context.Background(), "ports_test.json")
+	jsonLoader := NewJSON(portDomain, 1*time.Second)
+	err := jsonLoader.LoadFromFile("ports_test.json")
 	require.NoError(t, err)
 
 	// pick last port id from test file
